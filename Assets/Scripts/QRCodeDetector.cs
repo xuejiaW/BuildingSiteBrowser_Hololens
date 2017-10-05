@@ -14,19 +14,21 @@ public class QRCodeDetector : MonoBehaviour {
 
     IEnumerator Start()
     {
-        Debug.Log("Enter QRCode Start");
         barcodeReader = new BarcodeReader();
         yield return Application.RequestUserAuthorization(UserAuthorization.WebCam);//请求授权使用摄像头  
         if (Application.HasUserAuthorization(UserAuthorization.WebCam))
         {
             WebCamDevice[] devices = WebCamTexture.devices;
+            if (devices.Length == 0)
+                yield break;
             string devicename = devices[0].name;
-            webCameraTexture = new WebCamTexture(devicename, 400, 300);
+
+            webCameraTexture = new WebCamTexture(devicename, Screen.width, Screen.height);
             cameraTexture.texture = webCameraTexture;
             webCameraTexture.Play();
             StartCoroutine(ScanQRCode());
         }
-
+        UIUtils.SetEachZTestMode(gameObject, GUIZTestMode.Always);
     }
 
     private IEnumerator ScanQRCode()

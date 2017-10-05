@@ -17,7 +17,6 @@ public class UIManager : Singleton<UIManager>
 
     private Color _FocusColor=new Color(1,0,0,0.33f);
     private Color _NormalColor = new Color(1, 1, 1, 0.33f);
-    //private IEnumerator[] moveCoroutines;
     private IEnumerator _forward;
     private IEnumerator _back;
     private IEnumerator _left;
@@ -33,6 +32,7 @@ public class UIManager : Singleton<UIManager>
 
     private void Start()
     {
+        UIUtils.SetEachZTestMode(gameObject, GUIZTestMode.Always);
         UIIcon[] UIIcons = transform.GetComponentsInChildren<UIIcon>();
         for (MoveDirection direction = MoveDirection.Up; direction <= MoveDirection.Backward; ++direction)
         {
