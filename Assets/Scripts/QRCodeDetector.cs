@@ -3,19 +3,98 @@ using System.Collections.Generic;
 using UnityEngine;
 using ZXing;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class QRCodeDetector : MonoBehaviour {
+public class QRCodeDetector : Singleton<QRCodeDetector>
+{
+    //TODO: low fps while the detector is running
+    public GameObject QRCodeUI_Prefab;
+    private GameObject QRCodeUI;
+    private Text QRCodeText;
 
     private Color32[] data { get; set; }
-    public RawImage cameraTexture;
-    public Text QRcodeText;
     private WebCamTexture webCameraTexture;
-    private BarcodeReader barcodeReader;
+    private BarcodeReader QRCodeReader;
 
-    IEnumerator Start()
+    private IEnumerator scanQRCodeCoroutine;
+
+    public delegate void DetectedQRCode(string CodeResult);
+    public event DetectedQRCode OnDetectedQRCode;
+
+    private void Start()
     {
-        barcodeReader = new BarcodeReader();
-        yield return Application.RequestUserAuthorization(UserAuthorization.WebCam);//请求授权使用摄像头  
+        scanQRCodeCoroutine = ScanQRCode();
+        StartCoroutine(InitWebCamera());
+
+        GestureManager.Instance.OnDoubleClick += tryOpenQRCodeDetector;
+    }
+
+    private void tryOpenQRCodeDetector()
+    {
+        if (webCameraTexture == null)
+            return;
+        if (HoloInputModule.Instance.CurrentRaycastGameObject == null && !GazeManager.Instance.Hit)
+        {
+            if (webCameraTexture.isPlaying)
+                stopQRCodeDetector();
+            else
+                openQRCodeDetector();
+        }
+    }
+
+    private void openQRCodeDetector()
+    {
+        webCameraTexture.Play();
+        QRCodeUI = Instantiate(QRCodeUI_Prefab);
+        InitQRCodeUIComponent();
+        CursorManager.Instance.HideCursor = true;
+        StartCoroutine(scanQRCodeCoroutine);
+    }
+
+    private void stopQRCodeDetector()
+    {
+        webCameraTexture.Stop();
+        Destroy(QRCodeUI);
+        CursorManager.Instance.HideCursor = false;
+        StopCoroutine(scanQRCodeCoroutine);
+    }
+
+    private void InitQRCodeUIComponent()
+    {
+        if (QRCodeUI == null)
+            return;
+
+        UIUtils.SetEachZTestMode(QRCodeUI, GUIZTestMode.Always);
+        QRCodeUI.GetComponent<Canvas>().worldCamera = Camera.main;
+        QRCodeText = QRCodeUI.transform.Find("ScanResult").GetComponent<Text>();
+    }
+
+    private IEnumerator ScanQRCode()
+    {
+        QRCodeReader = new BarcodeReader();
+        while (true)
+        {
+            yield return new WaitForSecondsRealtime(0.5f);
+            data = webCameraTexture.GetPixels32();//相机捕捉到的纹理  
+            Result _result = QRCodeReader.Decode(data, webCameraTexture.width, webCameraTexture.height);
+            if (_result != null)
+                DetectedQRHandle(_result);
+        }
+    }
+
+    private void DetectedQRHandle(Result _QRResult)
+    {
+        QRCodeText.text = _QRResult.Text;
+        stopQRCodeDetector();
+
+        if (OnDetectedQRCode != null)
+            OnDetectedQRCode(_QRResult.Text);
+    }
+
+
+    private IEnumerator InitWebCamera()
+    {
+        yield return Application.RequestUserAuthorization(UserAuthorization.WebCam);
         if (Application.HasUserAuthorization(UserAuthorization.WebCam))
         {
             WebCamDevice[] devices = WebCamTexture.devices;
@@ -24,30 +103,10 @@ public class QRCodeDetector : MonoBehaviour {
             string devicename = devices[0].name;
 
             webCameraTexture = new WebCamTexture(devicename, Screen.width, Screen.height);
-            cameraTexture.texture = webCameraTexture;
-            webCameraTexture.Play();
-            StartCoroutine(ScanQRCode());
-        }
-        UIUtils.SetEachZTestMode(gameObject, GUIZTestMode.Always);
-    }
-
-    private IEnumerator ScanQRCode()
-    {
-        while (true)
-        {
-            yield return new WaitForSecondsRealtime(0.5f);
-            data = webCameraTexture.GetPixels32();//相机捕捉到的纹理  
-            DecodeQR(webCameraTexture.width, webCameraTexture.height);
         }
     }
-
-
-    private void DecodeQR(int width, int height)
+    private void OnDestroy()
     {
-        Result br = barcodeReader.Decode(data, width, height);
-
-        if (br != null)
-            QRcodeText.text = br.Text;
-
+        GestureManager.Instance.OnDoubleClick -= tryOpenQRCodeDetector;
     }
 }

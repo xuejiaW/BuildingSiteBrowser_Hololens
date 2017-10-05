@@ -44,20 +44,6 @@ public class UIManager : Singleton<UIManager>
 
             UIIcons[index]._OnClick += (() => {Interact.SelectedGameObject.transform.Translate(GetMoveDirection(_moveDirection) * 0.1f);});
 
-            UIIcons[index]._OnDown += (() => 
-            {
-                Debug.Log("OnDown");
-                if (currentCoroutine != null)
-                    return;
-                currentCoroutine = GetMoveCoroutine(_moveDirection);
-                StartCoroutine(currentCoroutine);
-            });
-
-            UIIcons[index]._OnUp += (() =>
-            {
-                Debug.Log("OnUp");
-                StopCoroutine(currentCoroutine);currentCoroutine = null;
-            });
         }    
     }
 
