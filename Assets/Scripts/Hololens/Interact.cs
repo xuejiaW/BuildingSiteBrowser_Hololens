@@ -43,7 +43,6 @@ public class Interact : MonoBehaviour
             CancelProcess(_selectedGameObject);
         else
             SelectProcess();
-
     }
 
     private void SelectProcess()
