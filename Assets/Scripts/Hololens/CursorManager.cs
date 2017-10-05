@@ -6,6 +6,7 @@ using UnityEngine;
 /// </summary>
 public class CursorManager : Singleton<CursorManager>
 {
+    //TODO: Adjust the cursor size when raycast sth
     [Tooltip("The cursor when it hits some gameobjects")]
     public GameObject CursorOn;
 

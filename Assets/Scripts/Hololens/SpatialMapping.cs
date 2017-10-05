@@ -16,7 +16,7 @@ public class SpatialMapping : MonoBehaviour
     public bool drawVisualMeshes = false;
 
     // If true, Spatial Mapping will be enabled. 
-    private bool mappingEnabled = true;
+    private bool mappingEnabled = false;
 
     // The layer to use for spatial mapping collisions.
     private int physicsLayer = 31;
