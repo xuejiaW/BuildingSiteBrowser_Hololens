@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4503379, g: 0.5003605, b: 0.5752899, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -6458,7 +6458,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MarkObjsRoot: {fileID: 289962156}
-  MarkObjsRoot_target: {fileID: 0}
   OriginModel: {fileID: 283885464}
 --- !u!1 &330864072
 GameObject:
@@ -8445,6 +8444,7 @@ GameObject:
   - component: {fileID: 430427121}
   - component: {fileID: 430427119}
   - component: {fileID: 430427122}
+  - component: {fileID: 430427123}
   m_Layer: 0
   m_Name: GeneralManager
   m_TagString: Untagged
@@ -8465,6 +8465,7 @@ Transform:
   - {fileID: 860929507}
   - {fileID: 43789028}
   - {fileID: 329318612}
+  - {fileID: 2061122298}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -8516,6 +8517,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c743a0525290007419928a345bb812c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &430427123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 430427117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42e5a809788b2d04a95357169b67d943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  KeywordsAndResponses:
+  - Keyword: Take Photo
+    Response:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2061122299}
+          m_MethodName: TakePhoto
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+      m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
 --- !u!1 &431296611
 GameObject:
   m_ObjectHideFlags: 0
@@ -47382,6 +47412,46 @@ Transform:
   m_Father: {fileID: 81981153}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2061122297
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 2061122298}
+  - component: {fileID: 2061122299}
+  m_Layer: 0
+  m_Name: PictureVideoManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2061122298
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2061122297}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 430427118}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2061122299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2061122297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31e98dc0b04ac864d95fd78b682bacf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2063612011
 GameObject:
   m_ObjectHideFlags: 0
