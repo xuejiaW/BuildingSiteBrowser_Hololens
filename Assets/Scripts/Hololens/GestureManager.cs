@@ -1,12 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.VR.WSA.Input;
+
 
 public class GestureManager : Singleton<GestureManager>
 {
-    public GestureRecognizer ActiveRecognizer{get;private set;}
-    public GestureRecognizer ManipulationRecognizer{get;private set;}
+    public UnityEngine.XR.WSA.Input.GestureRecognizer ActiveRecognizer{get;private set;}
+    public UnityEngine.XR.WSA.Input.GestureRecognizer ManipulationRecognizer{get;private set;}
 
     public delegate void DoubleClickHandler();
     public event DoubleClickHandler OnDoubleClick;
@@ -15,14 +15,14 @@ public class GestureManager : Singleton<GestureManager>
 
     private void OnEnable()
     {
-        ManipulationRecognizer = new GestureRecognizer();
-        ManipulationRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.DoubleTap);
+        ManipulationRecognizer = new UnityEngine.XR.WSA.Input.GestureRecognizer();
+        ManipulationRecognizer.SetRecognizableGestures(UnityEngine.XR.WSA.Input.GestureSettings.Tap | UnityEngine.XR.WSA.Input.GestureSettings.DoubleTap);
         ManipulationRecognizer.TappedEvent += Recognizer_TappedEvent;
 
         SwitchRecognizer(ManipulationRecognizer);
     }
 
-    public void SwitchRecognizer(GestureRecognizer newRecognizer)
+    public void SwitchRecognizer(UnityEngine.XR.WSA.Input.GestureRecognizer newRecognizer)
     {
         if (newRecognizer == null)
             return;
@@ -37,7 +37,7 @@ public class GestureManager : Singleton<GestureManager>
         ActiveRecognizer = newRecognizer;
     }
 
-    private void Recognizer_TappedEvent(InteractionSourceKind source, int tapCount, Ray headRay)
+    private void Recognizer_TappedEvent(UnityEngine.XR.WSA.Input.InteractionSourceKind source, int tapCount, Ray headRay)
     {;
         if (tapCount == 1 && OnSingleClick != null)
             OnSingleClick();

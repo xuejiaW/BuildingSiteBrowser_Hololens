@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.VR.WSA.Input;
+
 
 /// <summary>
 /// To track whether hand is detected or not
@@ -16,22 +16,22 @@ public class HandsManager : Singleton<HandsManager>
 
     private void Awake()
     {
-        InteractionManager.SourceDetected += Source_Detected;
-        InteractionManager.SourceLost += Source_Lost;
+        UnityEngine.XR.WSA.Input.InteractionManager.InteractionSourceDetected += Source_Detected;
+        UnityEngine.XR.WSA.Input.InteractionManager.InteractionSourceLost += Source_Lost;
     }
 
     private void OnDestroy()
     {
-        InteractionManager.SourceDetected -= Source_Detected;
-        InteractionManager.SourceLost -= Source_Lost;
+        UnityEngine.XR.WSA.Input.InteractionManager.InteractionSourceDetected -= Source_Detected;
+        UnityEngine.XR.WSA.Input.InteractionManager.InteractionSourceLost -= Source_Lost;
     }
 
-    private void Source_Detected(InteractionSourceState hand)
+    private void Source_Detected(UnityEngine.XR.WSA.Input.InteractionSourceDetectedEventArgs hand)
     {
         HandDetected = true;
     }
 
-    private void Source_Lost(InteractionSourceState hand)
+    private void Source_Lost(UnityEngine.XR.WSA.Input.InteractionSourceLostEventArgs hand)
     {
         HandDetected = false;
     }
