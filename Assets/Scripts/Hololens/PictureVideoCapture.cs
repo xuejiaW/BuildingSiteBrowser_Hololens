@@ -16,11 +16,10 @@ public class PictureVideoCapture : Singleton<PictureVideoCapture>
 
     private void Start()
     {
-        UnityEngine.XR.WSA.WebCam.PhotoCapture.CreateAsync(true, OnPhotoCaptureCreated);
-
-#if NETFX_CORE
-        getPicturesFolderAsync();
-#endif
+//        UnityEngine.XR.WSA.WebCam.PhotoCapture.CreateAsync(true, OnPhotoCaptureCreated);
+//#if NETFX_CORE
+//        getPicturesFolderAsync();
+//#endif
     }
 
 #if NETFX_CORE
@@ -47,7 +46,10 @@ public class PictureVideoCapture : Singleton<PictureVideoCapture>
 
     private void OnPhotoModeStarted(UnityEngine.XR.WSA.WebCam.PhotoCapture.PhotoCaptureResult result)
     {
-        isReady = result.success;
+        string file = string.Format(@"Image_{0:yyyy-MM-dd_hh-mm-ss-tt}.jpg", DateTime.Now);
+        currentImagePath = System.IO.Path.Combine(Application.persistentDataPath, file);
+
+        capture.TakePhotoAsync(currentImagePath, UnityEngine.XR.WSA.WebCam.PhotoCaptureFileOutputFormat.JPG, OnCapturedPhotoToDisk);
     }
 
 
@@ -56,17 +58,10 @@ public class PictureVideoCapture : Singleton<PictureVideoCapture>
     /// </summary>
     public void TakePhoto()
     {
-        if (isReady)
-        {
-            string file = string.Format(@"Image_{0:yyyy-MM-dd_hh-mm-ss-tt}.jpg", DateTime.Now);
-            currentImagePath = System.IO.Path.Combine(Application.persistentDataPath, file);
-
-            capture.TakePhotoAsync(currentImagePath, UnityEngine.XR.WSA.WebCam.PhotoCaptureFileOutputFormat.JPG, OnCapturedPhotoToDisk);
-        }
-        else
-        {
-            Debug.LogWarning("The camera is not yet ready.");
-        }
+        UnityEngine.XR.WSA.WebCam.PhotoCapture.CreateAsync(true, OnPhotoCaptureCreated);
+#if NETFX_CORE
+        getPicturesFolderAsync();
+#endif
     }
 
     public void StopCamera()
@@ -84,7 +79,7 @@ public class PictureVideoCapture : Singleton<PictureVideoCapture>
                 System.IO.File.Move(currentImagePath, System.IO.Path.Combine(pictureFolderPath, "Camera Roll", System.IO.Path.GetFileName(currentImagePath)));
 
 #endif
-
+            StopCamera();
         }
         else
         {

@@ -15,8 +15,6 @@ public class UIManager : Singleton<UIManager>
         Backward
     }
 
-    private Color _FocusColor=new Color(1,0,0,0.33f);
-    private Color _NormalColor = new Color(1, 1, 1, 0.33f);
     private IEnumerator _forward;
     private IEnumerator _back;
     private IEnumerator _left;
@@ -38,9 +36,6 @@ public class UIManager : Singleton<UIManager>
         {
             int index = (int)direction;
             MoveDirection _moveDirection = direction;
-            UIIcons[index]._OnEnter += (() =>{UIIcons[index].color = _FocusColor;});
-
-            UIIcons[index]._OnExit += (() =>{UIIcons[index].color = _NormalColor;});
 
             UIIcons[index]._OnClick += (() => {Interact.SelectedGameObject.transform.Translate(GetMoveDirection(_moveDirection) * 0.1f);});
 

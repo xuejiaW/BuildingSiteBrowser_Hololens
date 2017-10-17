@@ -26,20 +26,18 @@ public class QRCodeDetector : Singleton<QRCodeDetector>
         scanQRCodeCoroutine = ScanQRCode();
         StartCoroutine(InitWebCamera());
 
-        GestureManager.Instance.OnDoubleClick += tryOpenQRCodeDetector;
+        //GestureManager.Instance.OnDoubleClick += tryOpenQRCodeDetector;
     }
 
-    private void tryOpenQRCodeDetector()
+    public void tryOpenQRCodeDetector()
     {
         if (webCameraTexture == null)
             return;
-        if (HoloInputModule.Instance.CurrentRaycastGameObject == null && !GazeManager.Instance.Hit)
-        {
-            if (webCameraTexture.isPlaying)
-                stopQRCodeDetector();
-            else
-                openQRCodeDetector();
-        }
+
+        if (webCameraTexture.isPlaying)
+            stopQRCodeDetector();
+        else
+            openQRCodeDetector();
     }
 
     private void openQRCodeDetector()
@@ -107,6 +105,6 @@ public class QRCodeDetector : Singleton<QRCodeDetector>
     }
     private void OnDestroy()
     {
-        GestureManager.Instance.OnDoubleClick -= tryOpenQRCodeDetector;
+        //GestureManager.Instance.OnDoubleClick -= tryOpenQRCodeDetector;
     }
 }

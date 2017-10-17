@@ -18,33 +18,38 @@ public class UIIcon : Graphic,IPointerClickHandler,IPointerEnterHandler,IPointer
     public delegate void OnUp();
     public event OnUp _OnUp;
 
+    public Color FocusColor = new Color(1, 0, 0, 0.33f);
+    public Color NormalColor = new Color(1, 1, 1, 0.33f);
+
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (_OnClick != null)
+        if(_OnClick!=null)
             _OnClick();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (_OnEnter != null)
+        color = FocusColor;
+        if(_OnEnter!=null)
             _OnEnter();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (_OnExit != null)
+        color = NormalColor;
+        if(_OnExit!=null)
             _OnExit();
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (_OnUp != null)
+        if(_OnUp!=null)
             _OnUp();
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (_OnDown != null)
+        if(_OnDown!=null)
             _OnDown();
     }
 }
