@@ -37,6 +37,7 @@ public class SpeechManager : Singleton<SpeechManager>
 
     private void keywordRecognizer_OnRecognized(PhraseRecognizedEventArgs args)
     {
+        Debug.Log("Detected args " + args.text);
         UnityEvent unityEvent;
         if (responses.TryGetValue(args.text, out unityEvent))
             unityEvent.Invoke();

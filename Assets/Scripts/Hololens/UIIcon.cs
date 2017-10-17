@@ -52,4 +52,10 @@ public class UIIcon : Graphic,IPointerClickHandler,IPointerEnterHandler,IPointer
         if(_OnDown!=null)
             _OnDown();
     }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        color = NormalColor;
+    }
 }

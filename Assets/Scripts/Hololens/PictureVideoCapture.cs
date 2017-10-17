@@ -3,81 +3,135 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.XR.WSA.WebCam;
 
 
 public class PictureVideoCapture : Singleton<PictureVideoCapture>
 {
-    private UnityEngine.XR.WSA.WebCam.PhotoCapture capture;
+    private PhotoCapture m_PhotoCapture;
+    private VideoCapture m_VideoCapture;
 
-    private bool isReady = false;
+    private string pictureFolderPath;
 
     private string currentImagePath;
-    private string pictureFolderPath;
+    private string currentVideoPath;
 
     private void Start()
     {
-//        UnityEngine.XR.WSA.WebCam.PhotoCapture.CreateAsync(true, OnPhotoCaptureCreated);
-//#if NETFX_CORE
-//        getPicturesFolderAsync();
-//#endif
-    }
-
-#if NETFX_CORE
-    private async void getPicturesFolderAsync() {
-        Windows.Storage.StorageLibrary picturesStorage = await Windows.Storage.StorageLibrary.GetLibraryAsync(Windows.Storage.KnownLibraryId.Pictures);
-        pictureFolderPath = picturesStorage.SaveFolder.Path;
-    }
-#endif
-
-    private void OnPhotoCaptureCreated(UnityEngine.XR.WSA.WebCam.PhotoCapture captureObject)
-    {
-        capture = captureObject;
-
-        Resolution resolution = UnityEngine.XR.WSA.WebCam.PhotoCapture.SupportedResolutions.OrderByDescending(res => res.width * res.height).First();
-
-        UnityEngine.XR.WSA.WebCam.CameraParameters c = new UnityEngine.XR.WSA.WebCam.CameraParameters(UnityEngine.XR.WSA.WebCam.WebCamMode.PhotoMode);
-        c.hologramOpacity = 1.0f;
-        c.cameraResolutionWidth = resolution.width;
-        c.cameraResolutionHeight = resolution.height;
-        c.pixelFormat = UnityEngine.XR.WSA.WebCam.CapturePixelFormat.BGRA32;
-
-        capture.StartPhotoModeAsync(c, OnPhotoModeStarted);
-    }
-
-    private void OnPhotoModeStarted(UnityEngine.XR.WSA.WebCam.PhotoCapture.PhotoCaptureResult result)
-    {
-        string file = string.Format(@"Image_{0:yyyy-MM-dd_hh-mm-ss-tt}.jpg", DateTime.Now);
-        currentImagePath = System.IO.Path.Combine(Application.persistentDataPath, file);
-
-        capture.TakePhotoAsync(currentImagePath, UnityEngine.XR.WSA.WebCam.PhotoCaptureFileOutputFormat.JPG, OnCapturedPhotoToDisk);
-    }
-
-
-    /// <summary>
-    /// Take a photo and save it to a temporary application folder.
-    /// </summary>
-    public void TakePhoto()
-    {
-        UnityEngine.XR.WSA.WebCam.PhotoCapture.CreateAsync(true, OnPhotoCaptureCreated);
 #if NETFX_CORE
         getPicturesFolderAsync();
 #endif
     }
 
-    public void StopCamera()
+    public void StartRecordingVideo()
     {
-        if (isReady)
-            capture.StopPhotoModeAsync(OnPhotoModeStopped);
+        VideoCapture.CreateAsync(true, OnVideoCaptureCreated);
     }
 
-    private void OnCapturedPhotoToDisk(UnityEngine.XR.WSA.WebCam.PhotoCapture.PhotoCaptureResult result)
+    void OnVideoCaptureCreated(VideoCapture videoCapture)
+    {
+        if (videoCapture != null)
+        {
+            m_VideoCapture = videoCapture;
+
+            Resolution cameraResolution = VideoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).First();
+            float cameraFramerate = VideoCapture.GetSupportedFrameRatesForResolution(cameraResolution).OrderByDescending((fps) => fps).First();
+
+            CameraParameters cameraParameters = new CameraParameters();
+            cameraParameters.hologramOpacity = 1.0f;
+            cameraParameters.frameRate = cameraFramerate;
+            cameraParameters.cameraResolutionWidth = cameraResolution.width;
+            cameraParameters.cameraResolutionHeight = cameraResolution.height;
+            cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+
+            m_VideoCapture.StartVideoModeAsync(cameraParameters,
+                                                VideoCapture.AudioState.None,
+                                                OnStartedVideoCaptureMode);
+        }
+        else
+        {
+            Debug.LogError("Failed to create VideoCapture Instance!");
+        }
+    }
+
+    void OnStartedVideoCaptureMode(VideoCapture.VideoCaptureResult result)
+    {
+        if (result.success)
+        {
+            string filename = string.Format("MyVideo_{0}.mp4", Time.time);
+            currentVideoPath = System.IO.Path.Combine(Application.persistentDataPath, filename);
+
+            m_VideoCapture.StartRecordingAsync(currentVideoPath, OnStartedRecordingVideo);
+        }
+    }
+
+    void OnStartedRecordingVideo(VideoCapture.VideoCaptureResult result)
+    {
+        Debug.Log("Started Recording Video!");
+    }
+
+    public void StopRecordingVideo()
+    {
+        m_VideoCapture.StopRecordingAsync(OnStoppedRecordingVideo);
+    }
+
+    void OnStoppedRecordingVideo(VideoCapture.VideoCaptureResult result)
+    {
+        Debug.Log("Stopped Recording Video!");
+        if (m_VideoCapture.IsRecording)
+            m_VideoCapture.StopVideoModeAsync(OnStoppedVideoCaptureMode);
+    }
+
+    void OnStoppedVideoCaptureMode(VideoCapture.VideoCaptureResult result)
+    {
+        Debug.Log("currentVideoPath is " + currentVideoPath);
+#if NETFX_CORE
+        System.IO.File.Move(currentVideoPath, System.IO.Path.Combine(pictureFolderPath, "Camera Roll", System.IO.Path.GetFileName(currentVideoPath)));
+#endif
+        m_VideoCapture.Dispose();
+        m_VideoCapture = null;
+    }
+
+    public void TakePhoto()
+    {
+        PhotoCapture.CreateAsync(true, OnPhotoCaptureCreated);
+    }
+
+    private void OnPhotoCaptureCreated(PhotoCapture captureObject)
+    {
+        m_PhotoCapture = captureObject;
+
+        Resolution resolution = PhotoCapture.SupportedResolutions.OrderByDescending(res => res.width * res.height).First();
+
+        CameraParameters c = new CameraParameters(WebCamMode.PhotoMode);
+        c.hologramOpacity = 1.0f;
+        c.cameraResolutionWidth = resolution.width;
+        c.cameraResolutionHeight = resolution.height;
+        c.pixelFormat = CapturePixelFormat.BGRA32;
+
+        m_PhotoCapture.StartPhotoModeAsync(c, OnPhotoModeStarted);
+    }
+
+    private void OnPhotoModeStarted(PhotoCapture.PhotoCaptureResult result)
+    {
+        string file = string.Format(@"Image_{0:yyyy-MM-dd_hh-mm-ss-tt}.jpg", DateTime.Now);
+        currentImagePath = System.IO.Path.Combine(Application.persistentDataPath, file);
+
+        m_PhotoCapture.TakePhotoAsync(currentImagePath, PhotoCaptureFileOutputFormat.JPG, OnCapturedPhotoToDisk);
+    }
+
+    public void StopCamera()
+    {
+        m_PhotoCapture.StopPhotoModeAsync(OnPhotoModeStopped);
+    }
+
+    private void OnCapturedPhotoToDisk(PhotoCapture.PhotoCaptureResult result)
     {
         if (result.success)
         {
 #if NETFX_CORE
             if(pictureFolderPath != null)
                 System.IO.File.Move(currentImagePath, System.IO.Path.Combine(pictureFolderPath, "Camera Roll", System.IO.Path.GetFileName(currentImagePath)));
-
 #endif
             StopCamera();
         }
@@ -87,12 +141,18 @@ public class PictureVideoCapture : Singleton<PictureVideoCapture>
         }
     }
 
-    private void OnPhotoModeStopped(UnityEngine.XR.WSA.WebCam.PhotoCapture.PhotoCaptureResult result)
+    private void OnPhotoModeStopped(PhotoCapture.PhotoCaptureResult result)
     {
-        capture.Dispose();
-        capture = null;
-        isReady = false;
+        m_PhotoCapture.Dispose();
+        m_PhotoCapture = null;
     }
+
+#if NETFX_CORE
+    private async void getPicturesFolderAsync() {
+        Windows.Storage.StorageLibrary picturesStorage = await Windows.Storage.StorageLibrary.GetLibraryAsync(Windows.Storage.KnownLibraryId.Pictures);
+        pictureFolderPath = picturesStorage.SaveFolder.Path;
+    }
+#endif
 
 }
 

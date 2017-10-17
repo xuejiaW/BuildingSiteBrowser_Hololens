@@ -24,12 +24,14 @@ public class GeneralUIManager : Singleton<GeneralUIManager>
 
         transform.Find("StartVideo").GetComponent<UIIcon>()._OnClick += (() =>
         {
-
+            Debug.Log("Start recording Video");
+            PictureVideoCapture.Instance.StartRecordingVideo();
         });
 
         transform.Find("StopVideo").GetComponent<UIIcon>()._OnClick += (() =>
         {
-
+            Debug.Log("Stop recording Video");
+            PictureVideoCapture.Instance.StopRecordingVideo();
         });
 
         transform.Find("QRCode").GetComponent<UIIcon>()._OnClick += (() => 
@@ -40,7 +42,8 @@ public class GeneralUIManager : Singleton<GeneralUIManager>
 
     private void SwitchGameObjectActive()
     {
-        gameObject.SetActive(!gameObject.activeSelf);
+        if(!GazeManager.Instance.Hit)
+            gameObject.SetActive(!gameObject.activeSelf);
     }
 
     private void OnDestroy()
