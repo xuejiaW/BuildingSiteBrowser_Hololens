@@ -5,10 +5,12 @@ using UnityEngine;
 public class GazeManager : Singleton<GazeManager>
 {
     [Tooltip("The max gaze distance for calculationg a hit")]
-    public float MaxGazeDistance = 2f;
+    public float MaxGazeDistance = 10.0f;
 
     [Tooltip("Select the layers raycast should target")]
     public LayerMask RaycastLayerMask = Physics.DefaultRaycastLayers;
+
+    public float HitDistance = 2.0f;
 
     /// <summary>
     /// Whether the raycast hit something or not
@@ -25,6 +27,11 @@ public class GazeManager : Singleton<GazeManager>
         private set;
     }
 
+    public GameObject HitObject
+    {
+        get;
+        private set;
+    }
     /// <summary>
     /// Hit Position
     /// </summary>
@@ -67,13 +74,16 @@ public class GazeManager : Singleton<GazeManager>
         if (Hit)
         {
             //minus to make sure that the cursor will always be out the model
-            HitPosition = hitInfo.point-gazeDirection*0.1f;
+            HitPosition = hitInfo.point - gazeDirection * 0.1f;
             HitNormal = hitInfo.normal;
+            HitObject = hitInfo.collider.gameObject;
+            HitDistance = hitInfo.distance;
         }
         else
         {
             HitPosition = gazeOrigin + (gazeDirection * 4);
             HitNormal = gazeDirection;
+            HitObject = null;
         }
     }
 }

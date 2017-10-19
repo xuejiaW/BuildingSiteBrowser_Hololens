@@ -16,6 +16,8 @@ public class CursorManager : Singleton<CursorManager>
     [Tooltip("The cursor when detected hand ")]
     public GameObject CursorHand;
 
+    private Vector3 targetScale;
+
     private bool _hideCursor;
     public bool HideCursor
     {
@@ -34,7 +36,7 @@ public class CursorManager : Singleton<CursorManager>
         }
     }
 
-	void Start ()
+    void Start()
     {
         if (CursorOn == null || CursorOff == null || CursorHand == null)
         {
@@ -45,7 +47,7 @@ public class CursorManager : Singleton<CursorManager>
         CursorOn.SetActive(false);
         CursorOff.SetActive(false);
         CursorHand.SetActive(false);
-	}
+    }
 
     private void Update()
     {
@@ -56,14 +58,23 @@ public class CursorManager : Singleton<CursorManager>
 
     private void UpdateCursorState()
     {
+        targetScale = Vector3.one;
+
+        GameObject newTargetedObject = GazeManager.Instance.HitObject;
+
         transform.position = GazeManager.Instance.HitPosition;
         transform.up = GazeManager.Instance.HitNormal;
 
-        if (CursorOn == null || CursorOff == null || CursorHand==null)
+        if (newTargetedObject == null)
+            transform.localScale = targetScale * 4;
+        else
+            transform.localScale = targetScale * GazeManager.Instance.HitDistance;
+
+        if (CursorOn == null || CursorOff == null || CursorHand == null)
             return;
 
         CursorHand.SetActive(HandsManager.Instance.HandDetected && !HideCursor);
-        CursorOn.SetActive(GazeManager.Instance.Hit && !HandsManager.Instance.HandDetected &&!HideCursor);
+        CursorOn.SetActive(GazeManager.Instance.Hit && !HandsManager.Instance.HandDetected && !HideCursor);
         CursorOff.SetActive(!GazeManager.Instance.Hit && !HandsManager.Instance.HandDetected && !HideCursor);
     }
 }
