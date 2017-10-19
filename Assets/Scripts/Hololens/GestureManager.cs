@@ -1,12 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.WSA.Input;
 
 
 public class GestureManager : Singleton<GestureManager>
 {
-    public UnityEngine.XR.WSA.Input.GestureRecognizer ActiveRecognizer{get;private set;}
-    public UnityEngine.XR.WSA.Input.GestureRecognizer ManipulationRecognizer{get;private set;}
+    public GestureRecognizer ActiveRecognizer{get;private set;}
+    public GestureRecognizer TappedRecognizer{get;private set;}
+    public GestureRecognizer ManipulationRecognizer { get; private set; }
+    public GestureRecognizer NavigationRecognizer { get; private set; }
+
+    [HideInInspector]
+    public bool IsNavigation = false;
+    [HideInInspector]
+    public bool IsManipulation = false;
+    public Vector3 NavigationRelativePosition{get;private set;}
+    public Vector3 ManipulationRelativePosition{get;private set;}
+    public Vector3 ManipulationStartPosition{get;private set;}
 
     public delegate void DoubleClickHandler();
     public event DoubleClickHandler OnDoubleClick;
@@ -15,15 +26,33 @@ public class GestureManager : Singleton<GestureManager>
 
     private void OnEnable()
     {
-        ManipulationRecognizer = new UnityEngine.XR.WSA.Input.GestureRecognizer();
-        ManipulationRecognizer.SetRecognizableGestures(UnityEngine.XR.WSA.Input.GestureSettings.Tap | UnityEngine.XR.WSA.Input.GestureSettings.DoubleTap);
+        TappedRecognizer = new GestureRecognizer();
+        TappedRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.DoubleTap);
+        TappedRecognizer.TappedEvent += Recognizer_TappedEvent;
+
+        NavigationRecognizer = new GestureRecognizer();
+        NavigationRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.DoubleTap | GestureSettings.NavigationRailsX);
+        NavigationRecognizer.NavigationStartedEvent += NavigationRecognizer_Start;
+        NavigationRecognizer.NavigationUpdatedEvent += NavigationRecognizer_Update;
+        NavigationRecognizer.NavigationCompletedEvent += NavigationRecognizer_Completed;
+        NavigationRecognizer.NavigationCanceledEvent += NavigationRecognizer_Canceled;
+        NavigationRecognizer.TappedEvent += Recognizer_TappedEvent;
+
+        ManipulationRecognizer = new GestureRecognizer();
+        ManipulationRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.DoubleTap | GestureSettings.ManipulationTranslate);
+        ManipulationRecognizer.ManipulationStartedEvent += ManipulationRecognzer_Start;
+        ManipulationRecognizer.ManipulationUpdatedEvent += ManipulationRecognzer_Update;
+        ManipulationRecognizer.ManipulationCompletedEvent += ManipulationRecognzer_Completed;
+        ManipulationRecognizer.ManipulationCanceledEvent += ManipulationRecognzer_Canceled;
         ManipulationRecognizer.TappedEvent += Recognizer_TappedEvent;
 
-        SwitchRecognizer(ManipulationRecognizer);
+
+        SwitchRecognizer(TappedRecognizer);
     }
 
-    public void SwitchRecognizer(UnityEngine.XR.WSA.Input.GestureRecognizer newRecognizer)
+    public void SwitchRecognizer(GestureRecognizer newRecognizer)
     {
+        Debug.Log("To active is " + newRecognizer.ToString());
         if (newRecognizer == null)
             return;
         if (ActiveRecognizer != null)
@@ -37,7 +66,7 @@ public class GestureManager : Singleton<GestureManager>
         ActiveRecognizer = newRecognizer;
     }
 
-    private void Recognizer_TappedEvent(UnityEngine.XR.WSA.Input.InteractionSourceKind source, int tapCount, Ray headRay)
+    private void Recognizer_TappedEvent(InteractionSourceKind source, int tapCount, Ray headRay)
     {;
         if (tapCount == 1 && OnSingleClick != null)
             OnSingleClick();
@@ -45,9 +74,61 @@ public class GestureManager : Singleton<GestureManager>
             OnDoubleClick();
     }
     
-    private void OnDisable()
+    private void NavigationRecognizer_Start(InteractionSourceKind source, Vector3 RelativePosition, Ray headRay)
     {
-        ManipulationRecognizer.TappedEvent -= Recognizer_TappedEvent;
+        IsNavigation = true;
+        NavigationRelativePosition = RelativePosition;
+    }
+    private void NavigationRecognizer_Update(InteractionSourceKind source, Vector3 RelativePosition, Ray headRay)
+    {
+        IsNavigation = true;
+        NavigationRelativePosition = RelativePosition;
+    }
+    private void NavigationRecognizer_Completed(InteractionSourceKind source, Vector3 RelativePosition, Ray headRay)
+    {
+        IsNavigation = false;
+    }
+    private void NavigationRecognizer_Canceled(InteractionSourceKind source, Vector3 RelativePosition, Ray headRay)
+    {
+        IsNavigation = false;
     }
 
+    private void ManipulationRecognzer_Start(InteractionSourceKind source, Vector3 RelativePosition, Ray headRay)
+    {
+        IsManipulation = true;
+        ManipulationStartPosition = RelativePosition;
+    }
+
+    private void ManipulationRecognzer_Update(InteractionSourceKind source, Vector3 RelativePosition, Ray headRay)
+    {
+        IsManipulation = true;
+        ManipulationRelativePosition = RelativePosition;
+    }
+
+    private void ManipulationRecognzer_Completed(InteractionSourceKind source, Vector3 RelativePosition, Ray headRay)
+    {
+        IsManipulation = false;
+    }
+
+    private void ManipulationRecognzer_Canceled(InteractionSourceKind source, Vector3 RelativePosition, Ray headRay)
+    {
+        IsManipulation = false;
+    }
+
+    private void OnDisable()
+    {
+        TappedRecognizer.TappedEvent -= Recognizer_TappedEvent;
+
+        NavigationRecognizer.NavigationStartedEvent -= NavigationRecognizer_Start;
+        NavigationRecognizer.NavigationUpdatedEvent -= NavigationRecognizer_Update;
+        NavigationRecognizer.NavigationCompletedEvent -= NavigationRecognizer_Completed;
+        NavigationRecognizer.NavigationCanceledEvent -= NavigationRecognizer_Canceled;
+        NavigationRecognizer.TappedEvent -= Recognizer_TappedEvent;
+
+        ManipulationRecognizer.ManipulationStartedEvent -= ManipulationRecognzer_Start;
+        ManipulationRecognizer.ManipulationUpdatedEvent -= ManipulationRecognzer_Update;
+        ManipulationRecognizer.ManipulationCompletedEvent -= ManipulationRecognzer_Completed;
+        ManipulationRecognizer.ManipulationCanceledEvent -= ManipulationRecognzer_Canceled;
+        ManipulationRecognizer.TappedEvent -= Recognizer_TappedEvent;
+    }
 }

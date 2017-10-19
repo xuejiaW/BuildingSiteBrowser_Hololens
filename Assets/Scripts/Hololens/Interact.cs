@@ -49,14 +49,7 @@ public class Interact : MonoBehaviour
     {
 
         SelectedGameObject = gameObject;
-        UIManager.Instance.transform.parent = SelectedGameObject.transform;
-        UIManager.Instance.transform.localPosition = new Vector3(-3.5f, 0,0);
-        UIManager.Instance.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward, Camera.main.transform.up);
-        Vector3 worldPosition = UIManager.Instance.transform.position;
-        UIManager.Instance.transform.parent = null;
-        UIManager.Instance.transform.position = worldPosition;
-
-        SelectedGameObject.GetComponent<MeshRenderer>().materials[0].color = Color.red;
+        AdjustUIPanel.Instance.gameObject.SetActive(true); ;
 
         for (int index = 0; index != InteractibleObject.Length; ++index)
         {
@@ -71,6 +64,10 @@ public class Interact : MonoBehaviour
         if (toBeCanceled == null)
             return;
         Debug.Log("Enter Cancel Process  "+toBeCanceled.name);
-        toBeCanceled.GetComponent<MeshRenderer>().materials[0].color = Color.white;
+        if (toBeCanceled == _selectedGameObject)
+        {
+            _selectedGameObject = null;
+            AdjustUIPanel.Instance.gameObject.SetActive(false);
+        }
     }
 }

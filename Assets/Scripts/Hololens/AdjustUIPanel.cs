@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class UIManager : Singleton<UIManager>
+public class AdjustUIPanel : Singleton<AdjustUIPanel>
 {
 
     private enum MoveDirection
@@ -37,26 +38,15 @@ public class UIManager : Singleton<UIManager>
             int index = (int)direction;
             MoveDirection _moveDirection = direction;
 
-            UIIcons[index]._OnClick += (() => {Interact.SelectedGameObject.transform.Translate(GetMoveDirection(_moveDirection) * 0.1f);});
+            UIIcons[index]._OnClick +=(()=> { MoveTargetObj(_moveDirection); });
 
-        }    
-    }
-
-    private IEnumerator moveFunction(Vector3 direction)
-    {
-        Debug.Log("Start move Function");
-        while (true)
-        {
-            Debug.Log("is moveing");
-            if (Interact.SelectedGameObject != null)
-                Interact.SelectedGameObject.transform.Translate(direction * 0.1f);
-            yield return null;
         }
+        Instance.gameObject.SetActive(false);//here use instance to make sure the instance to be valued
     }
 
-    private IEnumerator GetMoveCoroutine(MoveDirection direction)
+    private void MoveTargetObj(MoveDirection _moveDirection)
     {
-        return moveFunction(GetMoveDirection(direction));
+        Interact.SelectedGameObject.transform.Translate(GetMoveDirection(_moveDirection) * 0.1f);
     }
 
     private Vector3 GetMoveDirection(MoveDirection direction)
@@ -79,4 +69,25 @@ public class UIManager : Singleton<UIManager>
                 return new Vector3();
         }
     }
+
+    public void OnToggleValueChanged(Toggle calledToggle)
+    {
+        Debug.Log("Toggle name is " + calledToggle.name);
+
+        Toggle[] toggles = GetComponentsInChildren<Toggle>();
+        foreach (Toggle t in toggles)
+        {
+            if (t != calledToggle && calledToggle.isOn)
+                t.isOn = false;
+        }
+
+        if (!calledToggle.isOn)
+            GestureManager.Instance.SwitchRecognizer(GestureManager.Instance.TappedRecognizer);
+
+        if (calledToggle.name.IndexOf("Manipulation") != -1 && calledToggle.isOn)
+            GestureManager.Instance.SwitchRecognizer(GestureManager.Instance.ManipulationRecognizer);
+        else if (calledToggle.name.IndexOf("Navigation") != -1 && calledToggle.isOn)
+            GestureManager.Instance.SwitchRecognizer(GestureManager.Instance.NavigationRecognizer);
+    }
+
 }
